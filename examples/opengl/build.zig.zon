@@ -1,0 +1,14 @@
+.{
+    .name = .opengl,
+    .version = "0.0.0",
+    .fingerprint = 0x91bbcdebc44e4312, // Changing this has security and trust implications.
+    .minimum_zig_version = "0.15.2",
+    .dependencies = .{
+        .Window = .{ .path = "../.." },
+        .zigglgen = .{
+            .url = "git+https://github.com/castholm/zigglgen.git#595c65dcc7e4e194e405a6b8c98fe122e94c0b69",
+            .hash = "zigglgen-0.4.0-bmyqLejsLQCuWyKLwAy7X93Kz4rvYJ_VBL8O63o1wJ-R",
+        },
+    },
+    .paths = .{ "build.zig", "build.zig.zon", "src" },
+}
