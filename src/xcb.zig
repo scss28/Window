@@ -1,5 +1,4 @@
-//! Adapted:
-//! https://codeberg.org/andrewrk/daw/src/branch/main/src/xcb.zig
+// adapted: https://codeberg.org/andrewrk/daw/src/branch/main/src/xcb.zig
 
 extern "xcb" fn xcb_connect(displayname: ?[*:0]const u8, screenp: *c_int) callconv(.c) ?*connection_t;
 pub const connect = xcb_connect;
@@ -43,12 +42,25 @@ pub const wait_for_event = @extern(*const fn (c: *connection_t) callconv(.c) ?*g
     .name = "xcb_wait_for_event",
     .library_name = "xcb",
 });
+
 pub const poll_for_event = @extern(*const fn (c: *connection_t) callconv(.c) ?*generic_event_t, .{
     .name = "xcb_poll_for_event",
     .library_name = "xcb",
 });
+
 pub const intern_atom = @extern(*const InternAtomFn, .{
     .name = "xcb_intern_atom",
+    .library_name = "xcb",
+});
+
+pub const send_event = @extern(*const fn (
+    c: *connection_t,
+    propagate: u8,
+    destination: window_t,
+    event_mask: u32,
+    event: [*:0]const u8,
+) callconv(.c) xcb_void_cookie_t, .{
+    .name = "xcb_send_event",
     .library_name = "xcb",
 });
 
@@ -353,8 +365,117 @@ pub const ResponseType = packed struct(u8) {
         CLIENT_MESSAGE = 33,
         MAPPING_NOTIFY = 34,
         GE_GENERIC = 35,
+        _,
     };
 };
+
+pub const key_symbols_t = opaque {};
+pub const key_sym_t = u32;
+pub const key_symbols_alloc = @extern(*const fn (c: *connection_t) callconv(.c) ?*key_symbols_t, .{
+    .name = "xcb_key_symbols_alloc",
+    .library_name = "xcb",
+});
+
+pub const key_symbols_get_keysym = @extern(*const fn (
+    syms: *key_symbols_t,
+    keycode: keycode_t,
+    col: c_int,
+) callconv(.c) key_sym_t, .{
+    .name = "xcb_key_symbols_get_keysym",
+    .library_name = "xcb",
+});
+
+pub const pixmap_t = u32;
+pub const gcontext_t = u32;
+pub const cursor_t = u32;
+pub const drawable_t = u32;
+
+pub const IMAGE_FORMAT_XY_BITMAP: u8 = 0;
+
+pub const create_pixmap = @extern(*const fn (
+    c: *connection_t,
+    depth: u8,
+    pid: pixmap_t,
+    drawable: drawable_t,
+    width: u16,
+    height: u16,
+) callconv(.c) xcb_void_cookie_t, .{
+    .name = "xcb_create_pixmap",
+    .library_name = "xcb",
+});
+
+pub const create_gc = @extern(*const fn (
+    c: *connection_t,
+    cid: gcontext_t,
+    drawable: drawable_t,
+    value_mask: u32,
+    value_list: ?[*]const u32,
+) callconv(.c) xcb_void_cookie_t, .{
+    .name = "xcb_create_gc",
+    .library_name = "xcb",
+});
+
+pub const put_image = @extern(*const fn (
+    c: *connection_t,
+    format: u8,
+    drawable: drawable_t,
+    gc: gcontext_t,
+    width: u16,
+    height: u16,
+    dst_x: i16,
+    dst_y: i16,
+    left_pad: u8,
+    depth: u8,
+    data_len: u32,
+    data: [*]const u8,
+) callconv(.c) xcb_void_cookie_t, .{
+    .name = "xcb_put_image",
+    .library_name = "xcb",
+});
+
+pub const create_cursor = @extern(*const fn (
+    c: *connection_t,
+    cid: cursor_t,
+    source: pixmap_t,
+    mask: pixmap_t,
+    fore_red: u16,
+    fore_green: u16,
+    fore_blue: u16,
+    back_red: u16,
+    back_green: u16,
+    back_blue: u16,
+    x: u16,
+    y: u16,
+) callconv(.c) xcb_void_cookie_t, .{
+    .name = "xcb_create_cursor",
+    .library_name = "xcb",
+});
+
+pub const free_pixmap = @extern(*const fn (
+    c: *connection_t,
+    pixmap: pixmap_t,
+) callconv(.c) void, .{
+    .name = "xcb_free_pixmap",
+    .library_name = "xcb",
+});
+
+pub const free_gc = @extern(*const fn (
+    c: *connection_t,
+    gc: gcontext_t,
+) callconv(.c) void, .{
+    .name = "xcb_free_gc",
+    .library_name = "xcb",
+});
+
+pub const change_window_attributes = @extern(*const fn (
+    c: *connection_t,
+    window: window_t,
+    value_mask: u32,
+    value_list: [*]const u32,
+) callconv(.c) void, .{
+    .name = "xcb_change_window_attributes",
+    .library_name = "xcb",
+});
 
 pub const client_message_event_t = extern struct {
     response_type: ResponseType,
